@@ -1,42 +1,48 @@
 #include <iostream>
 #include <list>
-#include <math.h>
 #include <stdexcept>
-#include <utility>
 #include <vector>
 
 namespace ctci {
     namespace ch1 {
-        void move(std::vector<std::vector<int>>& matrix, const std::pair<int, int> from, const std::pair<int, int> to) {
-            matrix[to.first][to.second] = matrix[from.first][from.second];
+        using Matrix = std::vector<std::vector<int>>;
+
+        Matrix matMul(const Matrix& A, const Matrix& B, int n) {
+            Matrix result(n, std::vector<int>(n, 0));
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    for (int k = 0; k < n; k++)
+                        result[i][j] += A[i][k] * B[k][j];
+            return result;
         }
 
-        // Rotate an NxN matrix. We'll just go clockwise 90 degrees, to make it easy.
-        // For fun, we're going to rotate in-place.
-        void rotateMatrix(std::vector<std::vector<int>>& matrix, int n) {
-            std::cout << "n = " << n << "\n";
-            // Iterate over each of the elements in the top-left quadrant of the matrix.
-            // Move the four associated elements all at once.
-            for (int x = 0; x < ceil(n / 2.0); x++) {
-                for (int y = 0; y < floor(n / 2.0); y++) {
-                    const std::pair<int, int> top_left = { x, y };
-                    const std::pair<int, int> top_right = { n - 1 - y, x};
-                    const std::pair<int, int> bottom_right = { n - 1 - x, n - 1 - y};
-                    const std::pair<int, int> bottom_left = { y, n - 1 - x};
+        Matrix transpose(const Matrix& M, int n) {
+            Matrix result(n, std::vector<int>(n, 0));
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    result[i][j] = M[j][i];
+            return result;
+        }
 
-                    int tmp = matrix[top_left.first][top_left.second];
-                    move(matrix, top_right, top_left);
-                    move(matrix, bottom_right, top_right);
-                    move(matrix, bottom_left, bottom_right);
-                    matrix[bottom_left.first][bottom_left.second] = tmp;
-                }
-            }
+        // Anti-diagonal permutation matrix: P[i][n-1-i] = 1.
+        // Multiplying by P on the right reverses columns.
+        Matrix makeP(int n) {
+            Matrix P(n, std::vector<int>(n, 0));
+            for (int i = 0; i < n; i++)
+                P[i][n - 1 - i] = 1;
+            return P;
+        }
+
+        // 90° clockwise rotation = transpose(input) * P.
+        // Not in-place; O(n^3) time, O(n^2) space.
+        Matrix rotateMatrix(const Matrix& input, int n) {
+            return matMul(transpose(input, n), makeP(n), n);
         }
 
         class Example {
             public:
-                std::vector<std::vector<int>> input;
-                std::vector<std::vector<int>> output;
+                Matrix input;
+                Matrix output;
                 int n;
         };
 
@@ -79,26 +85,26 @@ namespace ctci {
             },
             // 5x5
             {
-                {{ 1,  2,  3,  4, 5},
+                {{ 1,  2,  3,  4,  5},
                  { 6,  7,  8,  9, 10},
                  {11, 12, 13, 14, 15},
                  {16, 17, 18, 19, 20},
                  {21, 22, 23, 24, 25}},
-                {{21, 16, 11,  6, 1},
-                 {22, 17, 12,  7, 2},
-                 {23, 18, 13,  8, 3},
-                 {24, 19, 14,  9, 4},
-                 {25, 20, 15, 10, 5}},
+                {{21, 16, 11,  6,  1},
+                 {22, 17, 12,  7,  2},
+                 {23, 18, 13,  8,  3},
+                 {24, 19, 14,  9,  4},
+                 {25, 20, 15, 10,  5}},
                 5
             },
         };
 
         int main(int argc, char** argv) {
             for (auto example : examples) {
-                rotateMatrix(example.input, example.n);
+                Matrix result = rotateMatrix(example.input, example.n);
                 for (int x = 0; x < example.n; x++) {
                     for (int y = 0; y < example.n; y++) {
-                        if (example.input[x][y] != example.output[x][y]) {
+                        if (result[x][y] != example.output[x][y]) {
                             throw std::runtime_error("Test failed.");
                         }
                     }
