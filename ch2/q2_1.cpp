@@ -78,7 +78,6 @@ namespace ctci {
             public:
                 std::vector<int> input;
                 std::string output;
-                bool isStringRotation;
         };
 
         std::list<Example> examples = {
