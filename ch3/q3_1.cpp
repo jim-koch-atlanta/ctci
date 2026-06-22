@@ -39,6 +39,9 @@ class StacksAsArray {
         // First available element in the array.
         int firstAvailable;
 
+        // Number of available elements in array.
+        int availableElements;
+
     public:
         StacksAsArray(int numberOfStacks) {
             array.resize(100);
@@ -51,6 +54,7 @@ class StacksAsArray {
 
             this->numberOfStacks = numberOfStacks;
             this->firstAvailable = numberOfStacks;
+            this->availableElements = 100 - numberOfStacks;
         }
 
         void push(int stackNumber, T value) {
@@ -59,6 +63,11 @@ class StacksAsArray {
             node.indexOfNext = indexOfFirst;
 
             if (freeList.empty()) {
+                if (availableElements == 0) {
+                    int currentSize = array.size();
+                    array.resize(array.size() * 2);
+                    availableElements  = currentSize;
+                }
                 array[firstAvailable] = node;
 
                 // Update "pointer" to first element.
@@ -76,6 +85,10 @@ class StacksAsArray {
         }
 
         T pop(int stackNumber) {
+            if (this->isEmpty(stackNumber)) {
+                throw std::runtime_error("Stack is empty.");
+            }
+
             int indexOfFirst = array[stackNumber].indexOfNext;
             StackNode<T> node = array[indexOfFirst];
 
@@ -86,6 +99,10 @@ class StacksAsArray {
         }
 
         T peek(int stackNumber) {
+            if (this->isEmpty(stackNumber)) {
+                throw std::runtime_error("Stack is empty.");
+            }
+
             int indexOfFirst = array[stackNumber].indexOfNext;
             StackNode<T> node = array[indexOfFirst];
             return node.value.value();
