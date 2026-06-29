@@ -7,7 +7,7 @@
 #include "../jim/directed-graph.h"
 
 namespace ctci {
-    namespace ch3 {
+    namespace ch4 {
 
         int main(int argc, char** argv) {
             // Linear chain: a->b->c->d->e->f->g, distance a to g = 6.
@@ -94,5 +94,5 @@ namespace ctci {
 }
 
 int main(int argc, char** argv) {
-    return ctci::ch3::main(argc, argv);
+    return ctci::ch4::main(argc, argv);
 }
